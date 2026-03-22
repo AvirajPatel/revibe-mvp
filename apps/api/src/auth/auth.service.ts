@@ -2,11 +2,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { EventsService } from 'src/events/events.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private eventsService: EventsService,
     private jwtService: JwtService,
   ) {}
 
@@ -17,6 +19,12 @@ export class AuthService {
       email,
       password: hashedPassword,
       role,
+    });
+
+    await this.eventsService.logEvent({
+      eventType: 'USER_REGISTERED',
+      userId: user.id,
+      payload: { email: user.email },
     });
 
     return {

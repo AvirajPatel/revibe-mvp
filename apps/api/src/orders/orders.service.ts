@@ -1,10 +1,13 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
+import { EventsService } from 'src/events/events.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
-
+  constructor(
+    private prisma: PrismaService,
+    private eventsService: EventsService
+  ) {}
   async createOrder(buyerId: string, items: {
     inventoryId: string;
     quantity: number;
@@ -63,6 +66,20 @@ export class OrdersService {
         },
         include: { items: true },
       });
+    });
+
+    await this.eventsService.logEvent({
+      eventType: 'ORDER_CREATED',
+      userId: buyerId,
+      entityId: order.id,
+      payload: {
+        total: order.total,
+        items: order.items.map((item) => ({
+          inventoryId: item.inventoryId,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      },
     });
 
     return {

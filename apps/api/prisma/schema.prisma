@@ -74,6 +74,15 @@ model OrderItem {
   order       Order @relation(fields: [orderId], references: [id])
 }
 
+model EventLog {
+  id        String   @id @default(uuid())
+  eventType String
+  entityId  String?
+  userId    String?
+  payload   Json?
+  createdAt DateTime @default(now())
+}
+
 enum Role {
   SELLER
   BUYER

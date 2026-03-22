@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
+import { EventsService } from 'src/events/events.service';
 
 @Injectable()
 export class SellersService {
-  constructor(private prisma: PrismaService) {}
-
+  constructor(
+    private prisma: PrismaService,
+    private eventsService: EventsService
+  ) {}
   async createSeller(userId: string, brandName: string, gstNumber?: string) {
     const seller = await this.prisma.sellerProfile.create({
       data: {
@@ -12,6 +15,13 @@ export class SellersService {
         brandName,
         gstNumber,
       },
+    });
+
+    await this.eventsService.logEvent({
+      eventType: 'SELLER_CREATED',
+      userId,
+      entityId: seller.id,
+      payload: { brandName },
     });
 
     return {

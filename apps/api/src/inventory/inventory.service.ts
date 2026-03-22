@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { PricingService } from 'src/pricing/pricing.service';
 import { Grade } from '@prisma/client';
+import { EventsService } from 'src/events/events.service';
 
 @Injectable()
 export class InventoryService {
   constructor(
     private prisma: PrismaService,
+    private eventsService: EventsService,
     private pricingService: PricingService,
   ) {}
 
@@ -37,6 +39,16 @@ export class InventoryService {
       },
       include: {
         pricing: true,
+      },
+    });
+
+    await this.eventsService.logEvent({
+      eventType: 'INVENTORY_CREATED',
+      userId: data.sellerId,
+      entityId: item.id,
+      payload: {
+        title: item.title,
+        quantity: item.quantity,
       },
     });
 
