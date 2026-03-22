@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class OrdersService {
         });
 
         if (!inventory) {
-          throw new BadRequestException('Inventory not found');
+          throw new NotFoundException('Inventory not found');
         }
 
         if (inventory.quantity < item.quantity) {
