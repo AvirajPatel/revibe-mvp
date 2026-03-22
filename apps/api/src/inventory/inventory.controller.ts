@@ -5,6 +5,7 @@ import {
   UseGuards,
   Req,
   Get,
+  BadRequestException,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -27,7 +28,7 @@ export class InventoryController {
     });
 
     if (!seller) {
-      throw new Error('Seller profile not found');
+      throw new BadRequestException('Seller profile not found');
     }
 
     return this.inventoryService.createInventory({
