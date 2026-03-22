@@ -11,7 +11,11 @@ import { PrismaService } from 'src/database/prisma.service';
 import { successResponse } from 'src/common/utils/response';
 import { Role } from 'src/common/enums/role.enum';
 import { Auth } from 'src/common/decorators/auth.decorator';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { CreateInventoryDto } from './dto/create-inventory.dto';
 
+@ApiTags('Inventory')
+@ApiBearerAuth('access-token')
 @Controller('inventory')
 export class InventoryController {
   constructor(
@@ -21,7 +25,7 @@ export class InventoryController {
 
   @Auth(Role.SELLER)
   @Post()
-  async createInventory(@Req() req, @Body() body: any) {
+  async createInventory(@Req() req, @Body() body: CreateInventoryDto) {
     const userId = req.user.userId;
 
     const seller = await this.prisma.sellerProfile.findUnique({

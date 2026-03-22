@@ -4,7 +4,10 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { createdResponse, successResponse } from 'src/common/utils/response';
 import { Role } from 'src/common/enums/role.enum';
 import { Auth } from 'src/common/decorators/auth.decorator';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Orders')
+@ApiBearerAuth('access-token')
 @Auth(Role.BUYER)
 @Controller('orders')
 export class OrdersController {

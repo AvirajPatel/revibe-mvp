@@ -3,7 +3,11 @@ import { SellersService } from './sellers.service';
 import { createdResponse, successResponse } from 'src/common/utils/response';
 import { Role } from 'src/common/enums/role.enum';
 import { Auth } from 'src/common/decorators/auth.decorator';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { CreateSellerDto } from './dto/create-seller.dto';
 
+@ApiTags('Sellers')
+@ApiBearerAuth('access-token')
 @Auth(Role.SELLER)
 @Controller('sellers')
 export class SellersController {
@@ -12,7 +16,7 @@ export class SellersController {
   @Post()
   async createSeller(
     @Req() req,
-    @Body() body: { brandName: string; gstNumber?: string },
+    @Body() body: CreateSellerDto,
   ) {
     const userId = req.user.userId;
 
