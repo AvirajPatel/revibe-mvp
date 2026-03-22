@@ -1,34 +1,32 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get } from '@nestjs/common';
 import { SellersService } from './sellers.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { createdResponse, successResponse } from 'src/common/utils/response';
+import { Role } from 'src/common/enums/role.enum';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
+@Auth(Role.SELLER)
 @Controller('sellers')
 export class SellersController {
   constructor(private sellersService: SellersService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
-  createSeller(
+  async createSeller(
     @Req() req,
     @Body() body: { brandName: string; gstNumber?: string },
   ) {
     const userId = req.user.userId;
 
-    const seller = this.sellersService.createSeller(
+    const seller = await this.sellersService.createSeller(
       userId,
       body.brandName,
       body.gstNumber,
     );
-    
     return createdResponse(seller);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMySeller(@Req() req) {
-    const seller = this.sellersService.getSellerByUser(req.user.userId);
-    
+  async getMySeller(@Req() req) {
+    const seller = await this.sellersService.getSellerByUser(req.user.userId);
     return successResponse(seller);
   }
 }

@@ -2,15 +2,15 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
   Req,
   Get,
   NotFoundException,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PrismaService } from 'src/database/prisma.service';
 import { successResponse } from 'src/common/utils/response';
+import { Role } from 'src/common/enums/role.enum';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
 @Controller('inventory')
 export class InventoryController {
@@ -19,7 +19,7 @@ export class InventoryController {
     private prisma: PrismaService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(Role.SELLER)
   @Post()
   async createInventory(@Req() req, @Body() body: any) {
     const userId = req.user.userId;
@@ -40,12 +40,12 @@ export class InventoryController {
   }
 
   @Get()
-  getAllInventory() {
-    const data = this.inventoryService.getAllInventory();
+  async getAllInventory() {
+    const data = await this.inventoryService.getAllInventory();
     return successResponse(data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(Role.SELLER)
   @Get('my')
   async getMyInventory(@Req() req) {
     const seller = await this.prisma.sellerProfile.findUnique({

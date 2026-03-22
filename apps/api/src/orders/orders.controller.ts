@@ -1,29 +1,27 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { createdResponse, successResponse } from 'src/common/utils/response';
+import { Role } from 'src/common/enums/role.enum';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
+@Auth(Role.BUYER)
 @Controller('orders')
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
-  createOrder(
+  async createOrder(
     @Req() req,
     @Body() body: CreateOrderDto,
   ) {
-    const order = this.ordersService.createOrder(req.user.userId, body.items);
-    
+    const order = await this.ordersService.createOrder(req.user.userId, body.items);
     return createdResponse(order);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('my')
-  getMyOrders(@Req() req) {
-    const orders = this.ordersService.getOrders(req.user.userId);
-    
+  async getMyOrders(@Req() req) {
+    const orders = await this.ordersService.getOrders(req.user.userId);
     return successResponse(orders);
   }
 }
