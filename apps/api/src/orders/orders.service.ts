@@ -15,10 +15,13 @@ export class OrdersService {
       const orderItems = [];
 
       for (const item of items) {
-        const inventory = await tx.inventoryItem.findUnique({
-          where: { id: item.inventoryId },
-          include: { pricing: true },
-        });
+        const inventoryResult: any = await tx.$queryRawUnsafe(`
+          SELECT * FROM "InventoryItem"
+          WHERE id = '${item.inventoryId}'
+          FOR UPDATE
+        `);
+
+        const inventory = inventoryResult[0];
 
         if (!inventory) {
           throw new NotFoundException('Inventory not found');
@@ -28,7 +31,11 @@ export class OrdersService {
           throw new BadRequestException('Insufficient stock');
         }
 
-        const price = inventory.pricing.sellingPrice;
+        const pricing = await tx.inventoryPricing.findUnique({
+          where: { inventoryId: inventory.id },
+        });
+
+        const price = pricing.sellingPrice;
 
         total += price * item.quantity;
 
