@@ -26,7 +26,7 @@ export class InventoryService {
       0,
     );
 
-    return this.prisma.inventoryItem.create({
+    const item = await this.prisma.inventoryItem.create({
       data: {
         ...data,
         pricing: {
@@ -39,21 +39,49 @@ export class InventoryService {
         pricing: true,
       },
     });
+
+    return {
+      id: item.id,
+      title: item.title,
+      quantity: item.quantity,
+      price: item.pricing?.sellingPrice,
+    };
   }
 
   async getAllInventory() {
-    return this.prisma.inventoryItem.findMany({
+    const items = await this.prisma.inventoryItem.findMany({
       include: {
         pricing: true,
         seller: true,
       },
     });
+
+    return items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      size: item.size,
+      grade: item.grade,
+      quantity: item.quantity,
+      price: item.pricing?.sellingPrice,
+      sellerBrand: item.seller?.brandName,
+    }));
   }
 
   async getSellerInventory(sellerId: string) {
-    return this.prisma.inventoryItem.findMany({
+    const items = await this.prisma.inventoryItem.findMany({
       where: { sellerId },
       include: { pricing: true },
     });
+
+    return items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      size: item.size,
+      grade: item.grade,
+      quantity: item.quantity,
+      price: item.pricing?.sellingPrice,
+    }));
   }
 }

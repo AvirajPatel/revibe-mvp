@@ -9,7 +9,7 @@ export class OrdersService {
     inventoryId: string;
     quantity: number;
   }[]) {
-    return this.prisma.$transaction(async (tx) => {
+    const order = await this.prisma.$transaction(async (tx) => {
       let total = 0;
 
       const orderItems = [];
@@ -57,12 +57,35 @@ export class OrdersService {
         include: { items: true },
       });
     });
+
+    return {
+      id: order.id,
+      total: order.total,
+      status: order.status,
+      items: order.items.map((item) => ({
+        inventoryId: item.inventoryId,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    };
   }
 
   async getOrders(buyerId: string) {
-    return this.prisma.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: { buyerId },
       include: { items: true },
     });
+
+    return orders.map((order) => ({
+      id: order.id,
+      total: order.total,
+      status: order.status,
+      createdAt: order.createdAt,
+      items: order.items.map((item) => ({
+        inventoryId: item.inventoryId,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    }));
   }
 }

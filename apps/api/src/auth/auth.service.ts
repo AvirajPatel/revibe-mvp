@@ -19,7 +19,12 @@ export class AuthService {
       role,
     });
 
-    return user;
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    };
   }
 
   async login(email: string, password: string) {
@@ -42,6 +47,11 @@ export class AuthService {
 
     return {
       access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
     };
   }
 }
