@@ -54,6 +54,26 @@ model InventoryPricing {
   inventory InventoryItem @relation(fields: [inventoryId], references: [id])
 }
 
+model Order {
+  id        String   @id @default(uuid())
+  buyerId   String
+  total     Float
+  status    OrderStatus @default(CREATED)
+  createdAt DateTime @default(now())
+
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  inventoryId String
+  quantity    Int
+  price       Float
+
+  order       Order @relation(fields: [orderId], references: [id])
+}
+
 enum Role {
   SELLER
   BUYER
@@ -70,4 +90,12 @@ enum Grade {
   A
   B
   C
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
